@@ -4,15 +4,10 @@ const { AuthenticationClient, ManagementClient } = require('auth0');
 const { config } = require('dotenv');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const app = express();                                        //creating an object that represents the main app
 const port = 4000;
 config();
-
-const auth0 = new AuthenticationClient({
-    domain: process.env.AUTH0_DOMAIN,
-    clientId: process.env.AUTH0_CLIENT_ID,
-    clientSecret: process.env.AUTH0_CLIENT_SECRET,
-});
 
 app.use(cookieParser());
 
@@ -28,6 +23,18 @@ app.use(cors({
 }))
 
 
+const management = new ManagementClient({
+    domain: process.env.MACHINE_DOMAIN,
+    clientId: process.env.MACHINE_CLIENT_ID,
+    clientSecret: process.env.MACHINE_CLIENT_SECRET
+})
+
+const auth0 = new AuthenticationClient({
+    domain: process.env.AUTH0_DOMAIN,
+    clientId: process.env.AUTH0_CLIENT_ID,
+    clientSecret: process.env.AUTH0_CLIENT_SECRET,
+});
+
 
 app.post('/login', async (req, res) => {
     const {email, password} = req.body;
@@ -37,16 +44,25 @@ app.post('/login', async (req, res) => {
             username: email,
             password: password,
             audience: `https://${process.env.AUTH0_DOMAIN}/api/v2/`,
-            realm: process.env.AUTH0_REALM
+            realm: process.env.AUTH0_REALM,
+            scope: 'openid profile email'
         });
-        const accessToken = account.data.access_token;
+        const access_token = account.data.access_token;
+        const userId = jwt.decode(access_token).sub;
 
-        res.cookie('accessToken', accessToken, {
+        res.cookie('userId', userId, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-            sameSite: 'None'
+            secure: process.env.NODE_ENV === 'production',      // Use secure cookies in production
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 60,
         });
-        
+    
+        res.cookie('accessToken', access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',      // Use secure cookies in production
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 60,
+        })
 
         res.status(200).send('Login Successfull');
     }
@@ -76,13 +92,18 @@ app.post('/register', async (req, res) => {
     }
 })
 
-//the problem here is that the cookies are returning undefined, i may need to do more research on cookies and fetch requests
 
 app.get('/profile', async (req, res) => {
-    const accessToken = req.cookies.accessToken;
-    console.log(accessToken);
+    const userId = req.cookies.userId;
 
-    res.status(200).json({accessToken: accessToken});
+    try{
+       const profile = await management.users.get({id: userId});
+       res.status(200).json({profile}); 
+    }
+    catch(error){
+        console.log(error);
+        res.status(403).json({error});
+    }
 }) 
 
 
