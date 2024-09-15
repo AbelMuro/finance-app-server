@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(cors({
     origin: 'http://localhost:3000',						                        //Access-Control-Allow-Origin
     methods: ['GET', 'POST', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],			//Access-Control-Allow-Headers
+    allowedHeaders: ['Content-Type', 'Authorization'],			                    //Access-Control-Allow-Headers
     credentials: true,
     maxAge: 3600,
     optionsSuccessStatus: 200
