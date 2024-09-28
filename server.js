@@ -104,7 +104,27 @@ app.get('/profile', async (req, res) => {
         console.log(error);
         res.status(403).json({error});
     }
-}) 
+});
+
+app.post('/add_budget', async (req, res) => {
+    const budget = req.body;
+    const userId = req.cookies.userId;
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        const prevBudgets = metadata.budgets || [];
+
+        await management.users.update({id: userId}, {
+            user_metadata: {budgets: [...prevBudgets, budget]}
+        });
+        res.status(200).send('profile updated successfully');        
+    }
+    catch(error){
+        res.status(403).send(`${error.message}`);
+    }
+})
 
 
 app.get('/', (req, res) => {
