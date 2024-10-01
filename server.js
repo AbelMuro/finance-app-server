@@ -124,6 +124,21 @@ app.post('/add_budget', async (req, res) => {
     catch(error){
         res.status(403).send(`${error.message}`);
     }
+});
+
+app.get('/get_budgets', async (req, res) => {
+    const userId = req.cookies.userId;
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const data = userData.user_metadata || {};
+        const budgets = data.budgets || [];
+        res.status(200).json(budgets);
+    }
+    catch(error){
+        res.status(403).send(`${error.message}`)
+    }
 })
 
 
