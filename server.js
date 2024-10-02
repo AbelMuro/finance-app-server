@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 
 app.use(cors({
     origin: 'http://localhost:3000',						                        //Access-Control-Allow-Origin
-    methods: ['GET', 'POST', 'DELETE'],
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
     allowedHeaders: ['Content-Type', 'Authorization'],			                    //Access-Control-Allow-Headers
     credentials: true,
     maxAge: 3600,
@@ -141,6 +141,33 @@ app.get('/get_budgets', async (req, res) => {
     }
 })
 
+
+//i will need to test out this endpoint
+app.put('/edit_budget', async (req, res) => {
+    const userId = req.cookies.userId;
+    const budgetData = req.body;
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data;
+        const metadata = userData.user_metadata;
+        let newBudgets = metadata.budgets;
+
+        newBudgets = newBudgets.map((budget) => {
+           return budget.id === budgetData.id ? [...budget, budgetData] : budget;
+        });
+
+        await management.users.update({id: userId}, {
+            user_metadata: {budgets: newBudgets}
+        });
+
+        res.status(200).send('Budget successfully updated');
+    }
+    catch(error){
+        res.status(403).send(`${error.message}`);
+    }
+
+})
 
 app.get('/', (req, res) => {
     res.send('Hello World')
