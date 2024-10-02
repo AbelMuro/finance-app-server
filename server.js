@@ -142,7 +142,6 @@ app.get('/get_budgets', async (req, res) => {
 })
 
 
-//i will need to test out this endpoint
 app.put('/edit_budget', async (req, res) => {
     const userId = req.cookies.userId;
     const budgetData = req.body;
@@ -154,7 +153,7 @@ app.put('/edit_budget', async (req, res) => {
         let newBudgets = metadata.budgets;
 
         newBudgets = newBudgets.map((budget) => {
-           return budget.id === budgetData.id ? [...budget, budgetData] : budget;
+           return budget.id === budgetData.id ? {...budget, ...budgetData} : budget;
         });
 
         await management.users.update({id: userId}, {
