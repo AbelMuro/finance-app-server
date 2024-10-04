@@ -102,7 +102,7 @@ app.get('/profile', async (req, res) => {
     }
     catch(error){
         console.log(error);
-        res.status(403).json({error});
+        res.status(500).json({error});
     }
 });
 
@@ -122,7 +122,7 @@ app.post('/add_budget', async (req, res) => {
         res.status(200).send('profile updated successfully');        
     }
     catch(error){
-        res.status(403).send(`${error.message}`);
+        res.status(500).send(`${error.message}`);
     }
 });
 
@@ -137,7 +137,7 @@ app.get('/get_budgets', async (req, res) => {
         res.status(200).json(budgets);
     }
     catch(error){
-        res.status(403).send(`${error.message}`)
+        res.status(500).send(`${error.message}`)
     }
 })
 
@@ -150,22 +150,45 @@ app.put('/edit_budget', async (req, res) => {
         const user = await management.users.get({id: userId});
         const userData = user.data;
         const metadata = userData.user_metadata;
-        let newBudgets = metadata.budgets;
+        let allBudgets = metadata.budgets;
 
-        newBudgets = newBudgets.map((budget) => {
+        allBudgets = allBudgets.map((budget) => {
            return budget.id === budgetData.id ? {...budget, ...budgetData} : budget;
         });
 
         await management.users.update({id: userId}, {
-            user_metadata: {budgets: newBudgets}
+            user_metadata: {budgets: allBudgets}
         });
 
         res.status(200).send('Budget successfully updated');
     }
     catch(error){
-        res.status(403).send(`${error.message}`);
+        res.status(500).send(`${error.message}`);
     }
+});
 
+app.delete('/delete_budget/:id', async (req, res) => {
+    const userId = req.cookies.userId;
+    const budgetId = req.params.id;
+
+    try{
+        const budgets = await management.users.get({id: userId});
+        const userData = budgets.data;
+        const metadata = userData.user_metadata;
+        let allBudgets = metadata.budgets;
+
+        allBudgets = allBudgets.filter((currentBudget) => currentBudget.id !== budgetId);
+
+        await management.users.update({id: userId}, {
+            user_metadata: {budgets: allBudgets}
+        });
+
+        res.status(200).send('Budget successfully deleted')
+    }
+    catch(error){
+        const message = error.message;
+        res.status(500).send(`${message}`);
+    }
 })
 
 app.get('/', (req, res) => {
