@@ -5,6 +5,9 @@ const { config } = require('dotenv');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const mutlerS3 = require('multer-s3');
+const aws = require('aws-sdk');
 const app = express();                                        //creating an object that represents the main app
 const port = 4000;
 config();
@@ -16,12 +19,11 @@ app.use(bodyParser.json());
 app.use(cors({
     origin: 'http://localhost:3000',						                        //Access-Control-Allow-Origin
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
-    allowedHeaders: ['Content-Type', 'Authorization'],			                    //Access-Control-Allow-Headers
+    allowedHeaders: ['Content-Type', 'Authorization', ''],			                    //Access-Control-Allow-Headers
     credentials: true,
     maxAge: 3600,
     optionsSuccessStatus: 200
 }))
-
 
 const management = new ManagementClient({
     domain: process.env.MACHINE_DOMAIN,
@@ -34,6 +36,25 @@ const auth0 = new AuthenticationClient({
     clientId: process.env.AUTH0_CLIENT_ID,
     clientSecret: process.env.AUTH0_CLIENT_SECRET,
 });
+
+const s3 = new aws.S3({
+    region: 'us-west-1',
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    signatureVersion: process.env.SIGNATURE_VERSION,
+});
+
+const upload = multer({
+    storage: mutlerS3({
+        s3: s3,
+        bucket: 'personal-finance-app',
+        key: (req, file, cb) => {
+            cb(null, `${Date.now()}-${file.originalname}`);
+        }
+    })
+});
+
+
 
 
 app.post('/login', async (req, res) => {
@@ -188,6 +209,51 @@ app.delete('/delete_budget/:id', async (req, res) => {
     catch(error){
         const message = error.message;
         res.status(500).send(`${message}`);
+    }
+});
+
+
+app.post('/add_transaction', upload.single('image'), async (req, res) => {
+    const userId = req.cookies.userId;
+    const imageURL = req.file?.location;
+    const transaction = {
+        recipient: req.body.recipient,
+        transactionId: req.body.transactionId,
+        category: req.body.category,
+        amount: req.body.amount,
+        plusOrMinus: req.body.plusOrMinus,
+        image: imageURL ? imageURL : ''
+    };
+
+    try{      
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        const prevBudgets = metadata.budgets || [];
+        let budgetExists = false;
+        
+        const newBudgets = prevBudgets.map((budget) => {
+            if(budget.category === transaction.category){
+                budgetExists = true;
+                return {...budget, transactions: [...budget.transactions, transaction]}
+            }
+            else
+                return budget;
+        });
+
+        if(!budgetExists || !prevBudgets.length)
+            return res.status(403).send('User must create budget first');
+
+        await management.users.update({id: userId}, {
+            user_metadata: {budgets: newBudgets}
+        });
+
+        res.status(200).send('Transaction has been added to budget');
+    }
+    catch(error){
+        console.log(error.message);
+        res.status(500).send(`${error.message}`);
+        
     }
 })
 
