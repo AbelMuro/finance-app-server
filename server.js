@@ -220,9 +220,11 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
         recipient: req.body.recipient,
         transactionId: req.body.transactionId,
         category: req.body.category,
-        amount: req.body.amount,
+        amount: Number(req.body.amount),
         plusOrMinus: req.body.plusOrMinus,
-        image: imageURL ? imageURL : ''
+        image: imageURL ? imageURL : '',
+        date: req.body.date,
+        order: Number(req.body.order)
     };
 
     try{      
@@ -235,7 +237,8 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
         const newBudgets = prevBudgets.map((budget) => {
             if(budget.category === transaction.category){
                 budgetExists = true;
-                return {...budget, transactions: [...budget.transactions, transaction]}
+                const totalSpent = budget.totalSpent;
+                return {...budget, totalSpent: totalSpent + transaction.amount, transactions: [...budget.transactions, transaction]}
             }
             else
                 return budget;
@@ -254,6 +257,26 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
         console.log(error.message);
         res.status(500).send(`${error.message}`);
         
+    }
+});
+
+app.get('/get_transactions', async (req, res) => {
+    const userId = req.cookies.userId;
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        const allBudgets = metadata.budgets || [];
+
+        const allTransactions = allBudgets.reduce((acc, budgets) => {
+            return [...acc, ...budgets.transactions]
+        }, []);
+
+        res.status(200).json(allTransactions);
+    }
+    catch(error){
+        res.status(500).send(`${error.message}`);
     }
 })
 
