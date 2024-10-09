@@ -277,6 +277,46 @@ app.get('/get_transactions', async (req, res) => {
     }
 })
 
+app.post('/add_pot', async (req, res) => {
+    const userId = req.cookies.userId;
+    const newPot = req.body;
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        const allPots = metadata.pots || [];
+
+        await management.users.update({id: userId}, {
+            user_metadata: {pots: [...allPots, newPot]}
+        });
+
+        res.status(200).send('Pot successfully saved in database')
+    }
+    catch(error){
+        const message = error.message;
+        res.status(500).send(message);
+    }
+
+});
+
+app.get('/get_pots', async (req, res) => {
+    const userId = req.cookies.userId;
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        const allPots = metadata.pots || [];
+
+        res.status(200).json(allPots);
+    }
+    catch(error){   
+        const message = error.message
+        res.status(500).text(message);
+    }
+})
+
 app.get('/', (req, res) => {
     res.send('Hello World')
 })
