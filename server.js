@@ -315,6 +315,58 @@ app.get('/get_pots', async (req, res) => {
         const message = error.message
         res.status(500).text(message);
     }
+});
+
+//need to test out this endpoint
+app.put('/edit_pot', async () => {
+    const userId = req.cookies.userId;
+    const editPot = req.body;
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        let allPots = metadata.pots || [];
+
+        allPots = allPots.map((pot) => {
+            if(pot.potId === editPot.potId)
+                return editPot;
+            else
+                return pot;
+        });
+
+        await management.users.update({id: userId},{
+            user_metadata: {pots: allPots}
+        });
+
+        res.status(200).send('pot has been successfully edited');
+    }
+    catch(error){
+        const message = error.message;
+        res.status(500).send(message)
+    }
+})
+
+app.delete('/delete_pot/:id', async () => {
+    const userId = req.cookies.userId;
+    const potId = req.params.id;
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        let allPots = metadata.pots || [];
+
+        allPots = allPots.filter((pot) => {
+            return pot.potId !== potId 
+        })
+
+        res.status(200).json(allPots);
+    }
+    catch(error){
+        const message = error.message;
+        res.status(500).send(message);
+    }
 })
 
 app.get('/', (req, res) => {
