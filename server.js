@@ -313,12 +313,11 @@ app.get('/get_pots', async (req, res) => {
     }
     catch(error){   
         const message = error.message
-        res.status(500).text(message);
+        res.status(500).send(message);
     }
 });
 
-//need to test out this endpoint
-app.put('/edit_pot', async () => {
+app.put('/edit_pot', async (req, res) => {
     const userId = req.cookies.userId;
     const editPot = req.body;
 
@@ -330,7 +329,7 @@ app.put('/edit_pot', async () => {
 
         allPots = allPots.map((pot) => {
             if(pot.potId === editPot.potId)
-                return editPot;
+                return {...pot, ...editPot};
             else
                 return pot;
         });
@@ -347,7 +346,7 @@ app.put('/edit_pot', async () => {
     }
 })
 
-app.delete('/delete_pot/:id', async () => {
+app.delete('/delete_pot/:id', async (req, res) => {
     const userId = req.cookies.userId;
     const potId = req.params.id;
 
@@ -361,7 +360,11 @@ app.delete('/delete_pot/:id', async () => {
             return pot.potId !== potId 
         })
 
-        res.status(200).json(allPots);
+        await management.users.update({id: userId}, {
+            user_metadata: {pots: allPots}
+        })
+
+        res.status(200).send('Pot has been successfully deleted');
     }
     catch(error){
         const message = error.message;
