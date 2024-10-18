@@ -320,7 +320,6 @@ app.get('/get_pots', async (req, res) => {
 app.put('/edit_pot', async (req, res) => {
     const userId = req.cookies.userId;
     const editPot = req.body;
-    console.log(userId);
 
     try{
         const user = await management.users.get({id: userId});
