@@ -114,6 +114,12 @@ app.post('/register', async (req, res) => {
 app.get('/profile', async (req, res) => {
     const userId = req.cookies.userId;
 
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
+
     try{
        const profile = await management.users.get({id: userId});
        res.status(200).json({profile}); 
@@ -127,6 +133,12 @@ app.get('/profile', async (req, res) => {
 app.post('/add_budget', async (req, res) => {
     const budget = req.body;
     const userId = req.cookies.userId;
+
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
 
     try{
         const user = await management.users.get({id: userId});
@@ -147,6 +159,12 @@ app.post('/add_budget', async (req, res) => {
 app.get('/get_budgets', async (req, res) => {
     const userId = req.cookies.userId;
 
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
+
     try{
         const user = await management.users.get({id: userId});
         const userData = user.data || {};
@@ -163,6 +181,12 @@ app.get('/get_budgets', async (req, res) => {
 app.put('/edit_budget', async (req, res) => {
     const userId = req.cookies.userId;
     const budgetData = req.body;
+
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
 
     try{
         const user = await management.users.get({id: userId});
@@ -189,6 +213,12 @@ app.delete('/delete_budget/:id', async (req, res) => {
     const userId = req.cookies.userId;
     const budgetId = req.params.id;
 
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
+
     try{
         const budgets = await management.users.get({id: userId});
         const userData = budgets.data;
@@ -213,6 +243,13 @@ app.delete('/delete_budget/:id', async (req, res) => {
 app.post('/add_transaction', upload.single('image'), async (req, res) => {
     const userId = req.cookies.userId;
     const imageURL = req.file?.location;
+
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
+
     const transaction = {
         recipient: req.body.recipient,
         transactionId: req.body.transactionId,
@@ -260,6 +297,12 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
 app.get('/get_transactions', async (req, res) => {
     const userId = req.cookies.userId;
 
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
+
     try{
         const user = await management.users.get({id: userId});
         const userData = user.data || {};
@@ -280,6 +323,12 @@ app.get('/get_transactions', async (req, res) => {
 app.post('/add_pot', async (req, res) => {
     const userId = req.cookies.userId;
     const newPot = req.body;
+
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
 
     try{
         const user = await management.users.get({id: userId});
@@ -303,6 +352,11 @@ app.post('/add_pot', async (req, res) => {
 app.get('/get_pots', async (req, res) => {
     const userId = req.cookies.userId;
 
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
     try{
         const user = await management.users.get({id: userId});
         const userData = user.data || {};
@@ -320,6 +374,12 @@ app.get('/get_pots', async (req, res) => {
 app.put('/edit_pot', async (req, res) => {
     const userId = req.cookies.userId;
     const editPot = req.body;
+
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
 
     try{
         const user = await management.users.get({id: userId});
@@ -350,6 +410,12 @@ app.delete('/delete_pot/:id', async (req, res) => {
     const userId = req.cookies.userId;
     const potId = req.params.id;
 
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
+
     try{
         const user = await management.users.get({id: userId});
         const userData = user.data || {};
@@ -370,6 +436,43 @@ app.delete('/delete_pot/:id', async (req, res) => {
         const message = error.message;
         res.status(500).send(message);
     }
+});
+
+app.post('/add_bill', upload.single('image'), async (req, res) => {
+    const userId = req.cookies.userId;
+    const imageURL = req.file?.location;
+
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return
+    }
+
+
+    const newBill = {
+        title: req.body.title,
+        dueDate: req.body.dueDate,
+        amountDue: req.body.amountDue,
+        image: imageURL ? imageURL : '',
+    }
+
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        let allBills = metadata.bills || [];
+        allBills.push(newBill);
+
+        await management.users.update({id: userId}, {
+            user_metadata: {bills: allBills}
+        });
+
+        res.status(200).send('Bill has been successfully added')
+    }
+    catch(error){
+        const message = error.message;
+        res.status(500).send(`${message}`);
+    }
+
 })
 
 app.get('/', (req, res) => {
