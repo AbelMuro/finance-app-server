@@ -302,7 +302,6 @@ app.get('/get_transactions', async (req, res) => {
         return
     }
 
-
     try{
         const user = await management.users.get({id: userId});
         const userData = user.data || {};
@@ -380,7 +379,6 @@ app.put('/edit_pot', async (req, res) => {
         return
     }
 
-
     try{
         const user = await management.users.get({id: userId});
         const userData = user.data || {};
@@ -444,15 +442,17 @@ app.post('/add_bill', upload.single('image'), async (req, res) => {
 
     if(!userId){
         res.status(401).send('user has been logged out');
-        return
+        return;
     }
 
 
     const newBill = {
+        id: req.body.id,
         title: req.body.title,
         dueDate: req.body.dueDate,
-        amountDue: req.body.amountDue,
+        amountDue: Number(req.body.amountDue),
         image: imageURL ? imageURL : '',
+        order: Number(req.body.order)
     }
 
     try{
@@ -466,13 +466,36 @@ app.post('/add_bill', upload.single('image'), async (req, res) => {
             user_metadata: {bills: allBills}
         });
 
-        res.status(200).send('Bill has been successfully added')
+        res.status(200).send('Bill has been successfully added');
     }
     catch(error){
         const message = error.message;
         res.status(500).send(`${message}`);
     }
 
+});
+
+app.get('/get_bills', async (req, res) => {
+    const userId = req.cookies.userId;
+
+    if(!userId){
+        res.status(401).send('user has been logged out');
+        return;
+    }
+    
+    try{
+        const user = await management.users.get({id: userId});
+        const userData = user.data || {};
+        const metadata = userData.user_metadata || {};
+        let allBills = metadata.bills || [];
+
+        res.status(200).json(allBills);
+    }
+    catch(error){
+        const message = error.message;
+
+        res.status(500).send(`${message}`);
+    }
 })
 
 app.get('/', (req, res) => {
