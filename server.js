@@ -168,7 +168,7 @@ app.post('/add_budget', async (req, res) => {
         const prevBudgets = metadata.budgets || [];
 
         await management.users.update({id: userId}, {
-            user_metadata: {budgets: [...prevBudgets, budget]}
+            user_metadata: {budgets: [budget, ...prevBudgets]}
         });
         res.status(200).send('profile updated successfully');        
     }
@@ -270,7 +270,6 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
         return
     }
 
-
     const transaction = {
         recipient: req.body.recipient,
         transactionId: req.body.transactionId,
@@ -288,20 +287,38 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
         const metadata = userData.user_metadata || {};
         const prevBudgets = metadata.budgets || [];
         let budgetExists = false;
+        let budgetExceeded = false;
         
         const newBudgets = prevBudgets.map((budget) => {
             if(budget.category === transaction.category){
                 budgetExists = true;
-                const totalSpent = budget.totalSpent;
-                return {...budget, totalSpent: totalSpent + transaction.amount, transactions: [...budget.transactions, transaction]}
+                let newTotalSpent;
+                if(transaction.plusOrMinus === '+')
+                    newTotalSpent = budget.totalSpent + transaction.amount;
+                else
+                    newTotalSpent = budget.totalSpent - transaction.amount;
+                if(newTotalSpent <= budget.limit){
+                    newTotalSpent = newTotalSpent < 0 ? 0 : newTotalSpent
+                    return {...budget, totalSpent: newTotalSpent, transactions: [...budget.transactions, transaction]}
+                }
+                    
+                else{
+                    budgetExceeded = true;
+                    return budget;
+                }
             }
             else
                 return budget;
         });
 
-        if(!budgetExists || !prevBudgets.length)
-            return res.status(403).send('User must create budget first');
-
+        if(!budgetExists || !prevBudgets.length){
+            res.status(403).send('You must create a budget with the category ');
+            return; 
+        }
+        else if(budgetExceeded){
+            res.status(403).send("Budget limit exceeded, you can't add anymore transactions to the budget ");
+            return;
+        }
         await management.users.update({id: userId}, {
             user_metadata: {budgets: newBudgets}
         });
@@ -349,7 +366,6 @@ app.post('/add_pot', async (req, res) => {
         return
     }
 
-
     try{
         const user = await management.users.get({id: userId});
         const userData = user.data || {};
@@ -357,7 +373,7 @@ app.post('/add_pot', async (req, res) => {
         const allPots = metadata.pots || [];
 
         await management.users.update({id: userId}, {
-            user_metadata: {pots: [...allPots, newPot]}
+            user_metadata: {pots: [newPot, ...allPots]}
         });
 
         res.status(200).send('Pot successfully saved in database')
