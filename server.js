@@ -288,6 +288,7 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
         const prevBudgets = metadata.budgets || [];
         let budgetExists = false;
         let budgetExceeded = false;
+        let amountIsBelowZero = false;
         
         const newBudgets = prevBudgets.map((budget) => {
             if(budget.category === transaction.category){
@@ -295,13 +296,15 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
                 let newTotalSpent;
                 if(transaction.plusOrMinus === '+')
                     newTotalSpent = budget.totalSpent + transaction.amount;
-                else
+                else{
                     newTotalSpent = budget.totalSpent - transaction.amount;
-                if(newTotalSpent <= budget.limit){
-                    newTotalSpent = newTotalSpent < 0 ? 0 : newTotalSpent
-                    return {...budget, totalSpent: newTotalSpent, transactions: [...budget.transactions, transaction]}
+                    if(newTotalSpent < 0){
+                        amountIsBelowZero = true;
+                        return budget;
+                    }
                 }
-                    
+                if(newTotalSpent <= budget.limit)
+                    return {...budget, totalSpent: newTotalSpent, transactions: [...budget.transactions, transaction]}
                 else{
                     budgetExceeded = true;
                     return budget;
@@ -312,11 +315,15 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
         });
 
         if(!budgetExists || !prevBudgets.length){
-            res.status(403).send('You must create a budget with the category ');
+            res.status(403).send('You must create a budget with the specified category');
             return; 
         }
         else if(budgetExceeded){
-            res.status(403).send("Budget limit exceeded, you can't add anymore transactions to the budget ");
+            res.status(403).send("Budget limit exceeded");
+            return;
+        }
+        else if(amountIsBelowZero){
+            res.status(403).send("This transaction will make the new budget amount drop below zero");
             return;
         }
         await management.users.update({id: userId}, {
