@@ -102,7 +102,8 @@ app.post('/register', async (req, res) => {
                 name: name,
                 budgets: [],
                 pots: [],
-                bills: []
+                bills: [],
+                income: 0
             }
         });
 
