@@ -99,7 +99,10 @@ app.post('/register', async (req, res) => {
             email,
             password,
             user_metadata: {
-                name: name
+                name: name,
+                budgets: [],
+                pots: [],
+                bills: []
             }
         });
 
@@ -294,15 +297,15 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
             if(budget.category === transaction.category){
                 budgetExists = true;
                 let newTotalSpent;
-                if(transaction.plusOrMinus === '+')
-                    newTotalSpent = budget.totalSpent + transaction.amount;
-                else{
+                if(transaction.plusOrMinus === '+'){
                     newTotalSpent = budget.totalSpent - transaction.amount;
                     if(newTotalSpent < 0){
                         amountIsBelowZero = true;
                         return budget;
-                    }
+                    }                    
                 }
+                else
+                    newTotalSpent = budget.totalSpent + transaction.amount;
                 if(newTotalSpent <= budget.limit)
                     return {...budget, totalSpent: newTotalSpent, transactions: [...budget.transactions, transaction]}
                 else{
@@ -323,7 +326,7 @@ app.post('/add_transaction', upload.single('image'), async (req, res) => {
             return;
         }
         else if(amountIsBelowZero){
-            res.status(403).send("This transaction will make the new budget amount drop below zero");
+            res.status(403).send(`Adding this transaction to the specified budget/category will make the total-spent drop below zero`);
             return;
         }
         await management.users.update({id: userId}, {
