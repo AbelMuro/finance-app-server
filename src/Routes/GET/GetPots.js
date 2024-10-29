@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const {management} = require('../Config/Auth0.js');
+const {management} = require('../../Config/Auth0.js');
 
-router.post('/add_pot', async (req, res) => {
+
+router.get('/get_pots', async (req, res) => {
     const userId = req.cookies.userId;
-    const newPot = req.body;
 
     if(!userId){
         res.status(401).send('user has been logged out');
@@ -17,17 +17,12 @@ router.post('/add_pot', async (req, res) => {
         const metadata = userData.user_metadata || {};
         const allPots = metadata.pots || [];
 
-        await management.users.update({id: userId}, {
-            user_metadata: {pots: [newPot, ...allPots]}
-        });
-
-        res.status(200).send('Pot successfully saved in database')
+        res.status(200).json(allPots);
     }
-    catch(error){
-        const message = error.message;
+    catch(error){   
+        const message = error.message
         res.status(500).send(message);
     }
-
 });
 
 module.exports = router;

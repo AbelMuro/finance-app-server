@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const {management} = require('../Config/Auth0.js');
-const upload = require('../Config/S3Mutler.js');
+const {management} = require('../../Config/Auth0.js');
+const upload = require('../../Config/S3Mutler.js');
 
 router.post('/add_bill', upload.single('image'), async (req, res) => {
     const userId = req.cookies.userId;

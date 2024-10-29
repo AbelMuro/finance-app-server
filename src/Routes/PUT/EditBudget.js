@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {management} = require('../Config/Auth0.js');
+const {management} = require('../../Config/Auth0.js');
 
 router.put('/edit_budget', async (req, res) => {
     const userId = req.cookies.userId;

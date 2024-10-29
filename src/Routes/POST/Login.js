@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const {auth0} = require('../Config/Auth0.js');
+const {auth0} = require('../../Config/Auth0.js');
 
 router.post('/login', async (req, res) => {
     const {email, password} = req.body;

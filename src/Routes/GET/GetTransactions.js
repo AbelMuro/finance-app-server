@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {management} = require('../Config/Auth0.js');
+const {management} = require('../../Config/Auth0.js');
 
 router.get('/get_transactions', async (req, res) => {
     const userId = req.cookies.userId;

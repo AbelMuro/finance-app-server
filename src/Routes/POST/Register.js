@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {auth0} = require('../Config/Auth0.js');
+const {auth0} = require('../../Config/Auth0.js');
 
 router.post('/register', async (req, res) => {
     const {email, name, password} = req.body;
