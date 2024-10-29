@@ -74,7 +74,7 @@ app.use(UpdateIncome);
 app.use(GetIncome);
 
 app.get('/', (req, res) => {
-    res.send('Hello World')
+    res.status(200).send('Hello World')
 })
 
 

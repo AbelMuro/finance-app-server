@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const {auth0} = require('../../Config/Auth0.js');
+const { config } = require('dotenv');
+
+config();
 
 router.post('/login', async (req, res) => {
     const {email, password} = req.body;
@@ -34,7 +37,12 @@ router.post('/login', async (req, res) => {
         res.status(200).send('Login Successfull');
     }
     catch(error){
-        res.status(400).json({error: error.message});
+        const message = error.message;
+
+        if(message === 'Wrong email or password.')
+            res.status(401).send(message);
+        else
+            res.status(500).json({error: error.message});
     }
 })
 
