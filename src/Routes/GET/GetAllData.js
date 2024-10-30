@@ -5,10 +5,9 @@ const {management} = require('../../Config/Auth0.js');
 
 router.get('/get_allData', async (req, res) => {
     const userId = req.cookies.userId;
-    console.log(userId);
 
     if(!userId){
-        res.status(401).send('user has been logged out');
+        res.status(401).send(`user has been logged out ${userId}`);
         return
     }
     
