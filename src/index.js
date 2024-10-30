@@ -20,11 +20,8 @@ const UpdateIncome = require('./Routes/POST/UpdateIncome.js');
 const GetIncome = require('./Routes/GET/GetIncome');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { config } = require('dotenv');
 const app = express();                                      
 const port = 4000;
-
-config();
 
 app.use(cors({
     origin: 'https://personal-finance-app-front-end.netlify.app',						//Access-Control-Allow-Origin
