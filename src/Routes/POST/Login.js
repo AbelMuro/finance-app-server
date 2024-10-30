@@ -24,6 +24,7 @@ router.post('/login', async (req, res) => {
             httpOnly: true,
             secure: true,  
             maxAge: 1000 * 60 * 60,
+            path: '/' 
         });
 
         res.status(200).send('Login Successfull');
