@@ -23,7 +23,7 @@ router.post('/login', async (req, res) => {
         res.cookie('userId', userId, {
             httpOnly: true,
             secure: true,  
-            sameSite: 'Strict',
+            sameSite: 'Lax',
             maxAge: 1000 * 60 * 60,
         });
 
