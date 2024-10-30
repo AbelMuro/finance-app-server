@@ -31,7 +31,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 app.use(cors({
-    origin: 'http://localhost:3000',						                        //Access-Control-Allow-Origin
+    origin: 'https://personal-finance-app-front-end.netlify.app',						//Access-Control-Allow-Origin
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     allowedHeaders: ['Content-Type', 'Authorization', ''],			                    //Access-Control-Allow-Headers
     credentials: true,
