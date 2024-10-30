@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const {management} = require('../../Config/Auth0.js');
-const cookieParser = require('cookie-parser');
-
-router.use(cookieParser());
 
 router.get('/get_allData', async (req, res) => {
     const userId = req.cookies.userId;

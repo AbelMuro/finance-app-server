@@ -28,7 +28,7 @@ router.post('/login', async (req, res) => {
             path: '/'
         });
 
-        res.status(200).send('Login Successfull');
+        res.status(200).send(`Login Successfull ${userId}`);
     }
     catch(error){
         const message = error.message;
