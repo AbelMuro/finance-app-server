@@ -20,8 +20,11 @@ const UpdateIncome = require('./Routes/POST/UpdateIncome.js');
 const GetIncome = require('./Routes/GET/GetIncome');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { config } = require('dotenv');
 const app = express();                                      
 const port = 4000;
+
+config();
 
 app.use(cookieParser());
 
@@ -78,7 +81,7 @@ app.get('/', (req, res) => {
 })
 
 
-app.listen(port, (error) => {
+app.listen(process.env.PORT || port, (error) => {
     if(error){
         console.log(error, 'error occured');
         return;
