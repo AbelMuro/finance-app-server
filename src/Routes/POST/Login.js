@@ -22,17 +22,10 @@ router.post('/login', async (req, res) => {
 
         res.cookie('userId', userId, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',      // Use secure cookies in production
+            secure: true,  
             sameSite: 'Strict',
             maxAge: 1000 * 60 * 60,
         });
-    
-        res.cookie('accessToken', access_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',      // Use secure cookies in production
-            sameSite: 'Strict',
-            maxAge: 1000 * 60 * 60,
-        })
 
         res.status(200).send('Login Successfull');
     }
