@@ -26,10 +26,6 @@ const port = 4000;
 
 config();
 
-app.use(cookieParser());
-
-app.use(bodyParser.json());
-
 app.use(cors({
     origin: 'https://personal-finance-app-front-end.netlify.app',						//Access-Control-Allow-Origin
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
@@ -39,6 +35,9 @@ app.use(cors({
     optionsSuccessStatus: 200
 }))
 
+app.use(cookieParser());
+
+app.use(bodyParser.json());
 
 app.use(login);
 
