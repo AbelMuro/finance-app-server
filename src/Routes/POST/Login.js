@@ -6,7 +6,6 @@ const { config } = require('dotenv');
 
 config();
 
-//need to figure out why my http only cookies are not working
 router.post('/login', async (req, res) => {
     const {email, password} = req.body;
 
