@@ -23,9 +23,6 @@ router.post('/login', async (req, res) => {
 
         res.cookie('userId', userId, {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== "development",  
-            domain: 'https://personal-finance-app-front-end.netlify.app',
-            maxAge: 1000 * 60 * 60,
         });
 
         res.status(200).send(`Login Successfull`);
