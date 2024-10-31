@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV !== "development",  
             sameSite: 'Lax',
-            domain: '.finance-app-server-5991576c358c.herokuapp.com',
+            domain: '.personal-finance-app-front-end.netlify.app',
             maxAge: 1000 * 60 * 60,
         });
 
