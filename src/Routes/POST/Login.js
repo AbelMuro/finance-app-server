@@ -23,6 +23,10 @@ router.post('/login', async (req, res) => {
 
         res.cookie('userId', userId, {
             httpOnly: true,
+            secure: process.env.NODE_ENV !== "development",  
+            sameSite: 'Lax',
+            domain: '.finance-app-server-5991576c358c.herokuapp.com',
+            maxAge: 1000 * 60 * 60,
         });
 
         res.status(200).send(`Login Successfull`);

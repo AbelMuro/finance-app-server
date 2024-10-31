@@ -28,6 +28,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     allowedHeaders: ['Content-Type', 'Authorization'],			                    //Access-Control-Allow-Headers
     credentials: true,
+    exposedHeaders: ['Set-Cookie'],
     maxAge: 3600,
     optionsSuccessStatus: 200
 }))
