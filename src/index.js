@@ -24,9 +24,9 @@ const app = express();
 const port = 4000;
 
 app.use(cors({
-    origin: 'https://personal-finance-app-front-end.netlify.app',						//Access-Control-Allow-Origin
+    origin: 'https://personal-finance-app-front-end.netlify.app/',						//Access-Control-Allow-Origin
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
-    allowedHeaders: ['Content-Type', 'Authorization', ''],			                    //Access-Control-Allow-Headers
+    allowedHeaders: ['Content-Type', 'Authorization'],			                    //Access-Control-Allow-Headers
     credentials: true,
     maxAge: 3600,
     optionsSuccessStatus: 200
