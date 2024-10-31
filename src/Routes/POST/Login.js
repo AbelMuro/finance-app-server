@@ -25,10 +25,11 @@ router.post('/login', async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV !== "development",  
             sameSite: 'Lax',
+            path: '/',
             maxAge: 1000 * 60 * 60,
         });
 
-        res.status(200).send(`Login Successfull ${process.env.NODE_ENV !== "development"}`);
+        res.status(200).send(`Login Successfull`);
     }
     catch(error){
         const message = error.message;
