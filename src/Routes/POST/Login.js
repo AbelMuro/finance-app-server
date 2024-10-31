@@ -24,9 +24,8 @@ router.post('/login', async (req, res) => {
         res.cookie('userId', userId, {
             httpOnly: true,
             secure: process.env.NODE_ENV !== "development",  
-            sameSite: 'lax',
+            sameSite: 'Lax',
             maxAge: 1000 * 60 * 60,
-            path: '/'
         });
 
         res.status(200).send(`Login Successfull`);
