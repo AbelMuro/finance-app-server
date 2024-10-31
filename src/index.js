@@ -30,7 +30,6 @@ app.use(cors({
     credentials: true,
     exposedHeaders: ['Set-Cookie'],
     maxAge: 3600,
-    optionsSuccessStatus: 200
 }))
 
 app.use(cookieParser());

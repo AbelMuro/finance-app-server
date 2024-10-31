@@ -25,11 +25,10 @@ router.post('/login', async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV !== "development",  
             sameSite: 'Lax',
-            domain: '.personal-finance-app-front-end.netlify.app',
             maxAge: 1000 * 60 * 60,
         });
 
-        res.status(200).send(`Login Successfull`);
+        res.status(200).send(`Login Successfull ${process.env.NODE_ENV !== "development"}`);
     }
     catch(error){
         const message = error.message;
