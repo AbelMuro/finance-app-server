@@ -18,8 +18,7 @@ router.post('/register', async (req, res) => {
         res.status(200).send('Account has been registered');
     }
     catch(error){
-        const message = error.message;
-        res.status(400).json(message);
+        res.status(400).send(`${error.message}`);
     }
 });
 
